@@ -539,7 +539,7 @@
         var buttons = [];
         for (var i = 0; i < l; i++) {
             var keycode = keyb.charCodeAt(i);
-            buttons.push('<div ontouchstart="event.preventDefault(); keydown_action({which:' + keycode + '});" onmousedown="event.preventDefault(); keydown_action({which:' + keycode + '});" ontouchend="event.preventDefault(); keyup_action({which:' + keycode + '});" onmouseup="event.preventDefault(); keyup_action({which:' + keycode + '});" class="note_button non_highlighted_button" id="note_' + keyb[i] + '">' + keyb[i] + '</div>');
+            buttons.push('<div ontouchstart="event.preventDefault(); keydown_action({which:' + keycode + '});" onmousedown="event.preventDefault(); keydown_action({which:' + keycode + '});" ontouchend="event.preventDefault(); keyup_action({which:' + keycode + '});" onmouseup="event.preventDefault(); keyup_action({which:' + keycode + '});"  ontouchmove="event.preventDefault();" ontouchcancel="event.preventDefault();" class="note_button non_highlighted_button" id="note_' + keyb[i] + '">' + keyb[i] + '</div>');
             if (keyb[i] == '0') {
                 document.getElementById('kb_1st_row').innerHTML = buttons.join('');
                 buttons.length = 0;
