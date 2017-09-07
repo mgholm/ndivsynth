@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="author" content="Martin Granholm"/>
+    <meta name="description" content="Explore N-div equal temperament">
+    <title>Microtonal N-div Synth</title>
+</head>
+<body onkeyup="keyup_action(event)" onkeydown="keydown_action(event)">
+    <style>
+    body {
+        background-color: rgb(185, 220, 160);
+        font-family: Verdana, Geneva, sans-serif;
+    }
+    h1, #author_details {
+        margin-top: 10px;
+    }
+    label {
+        font-size: 16px;
+    }
+    option {
+        font-size: 14px;
+    }
+    #settings {
+        margin-left: 20px;
+    }
+    #keyboard {
+        margin-left: 20px;
+        height: 200px;
+    }
+    .note_button {
+        width: 8%;
+        height: 40px;
+        margin: 1px;
+        padding: 0px;
+        border: 0px;
+        display: inline-block;
+    }
+    .non_highlighted_button {
+        background-color: white;
+    }
+    .non_highlighted_octave_button {
+        background-color: orange;
+    }
+    .non_highlighted_microtonal_button {
+        background-color: rgb(230, 230, 230);
+    }
+    .highlighted_button {
+        background-color: blue;
+    }
+    .highlighted_octave_button {
+        background-color: blue;
+    }
+    .highlighted_microtonal_button {
+        background-color: blue;
+    }
+    #kb_2nd_row {
+        margin-left: 25px;
+    }
+    #kb_3rd_row {
+        margin-left: 40px;
+    }
+    #kb_4th_row {
+        margin-left: 65px;
+    }
+    select {
+        width: 90%;
+        font-size: 14px;
+    }
+    .small_print {
+        font-size: 12px;
+    }
+    
+    #settings > div {
+        border: 2px solid #ccc;
+        padding: 5px;
+        height: 150px;
+        background-color: rgb(230, 230, 180);
+    }
+    
+    #settings > div > h3 {
+        margin-top: 2px;
+        margin-bottom: 7px;
+    }
+    
+    h2 {
+        font-size: 24px;
+        margin-bottom: 5px;
+    }
+    
+    .question {
+        font-weight: bold;
+    }
+    
+    .question, .answer {
+        font-size: 14px;
+    }
+    
+    </style>
+
+    <h1 style="float:left;">Microtonal N-div Synth</h1>
+    <div id="settings" style="clear:both;">
+        <label for="base_freq">Base frequency</label>
+        <input type="text" id="base_freq" name="base_freq" value="110"/>
+        <p></p>
+        <label for="num_divs">Divide octave in</label>
+        <input type="text" id="num_divs" name="num_divs" value="12"/>
+        <p></p>
+        <p class="small_print">Note: if you set the division to 12 (or any divisor of 12), you won't actually get microtonal results ;).</p>
+        <button onclick="make_octave_division()">Set Division</button>
+        <h2>Waveform Settings</h2>
+    
+        <div style="float:left;">
+            <h3>Wave 1</h3>
+            <select id="wave1_type" name="wave1_type">
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="triangle">Triangle</option>
+                <option value="sawtooth">Sawtooth</option>
+            </select><br/>
+            <label for="wave1_gain">Gain</label>
+            <input type="range" id="wave1_gain" name="wave1_gain" min="0" max="1" step="0.1" value="1"/><br/>
+            <label for="wave1_phase">Phase</label>
+            <input type="range" id="wave1_phase" name="wave1_phase" min="0" max="1" step="0.025" value="0"/>
+        </div>
+    
+        <div style="float:left;">
+            <h3>Wave 2</h3>
+            <select id="wave2_type" name="wave2_type">
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="triangle">Triangle</option>
+                <option value="sawtooth">Sawtooth</option>
+            </select><br/>
+            <label for="wave2_gain">Gain</label>
+            <input type="range" id="wave2_gain" name="wave2_gain" min="0" max="1" step="0.1" value="0"/><br/>
+            <label for="wave2_phase">Phase</label>
+            <input type="range" id="wave2_phase" name="wave2_phase" min="0" max="1" step="0.025" value="0"/><br/>
+            <label for="wave2_harmonic">Harmonic</label>
+            <input type="range" id="wave2_harmonic" name="wave2_harmonic" min="1" max="8" step="1" value="1"/>
+        </div>
+    
+        <div style="float:left;">
+            <h3>Wave 3</h3>
+            <select id="wave3_type" name="wave3_type">
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="triangle">Triangle</option>
+                <option value="sawtooth">Sawtooth</option>
+            </select><br/>
+            <label for="wave3_gain">Gain</label>
+            <input type="range" id="wave3_gain" name="wave3_gain" min="0" max="1" step="0.1" value="0"/><br/>
+            <label for="wave3_phase">Phase</label>
+            <input type="range" id="wave3_phase" name="wave3_phase" min="0" max="1" step="0.025" value="0"/><br/>
+            <label for="wave3_harmonic">Harmonic</label>
+            <input type="range" id="wave3_harmonic" name="wave3_harmonic" min="1" max="8" step="1" value="1"/>
+        </div>
+        <div style="float:left;">
+            <h3>Wave 4</h3>
+            <select id="wave4_type" name="wave4_type">
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="triangle">Triangle</option>
+                <option value="sawtooth">Sawtooth</option>
+            </select><br/>
+            <label for="wave4_gain">Gain</label>
+            <input type="range" id="wave4_gain" name="wave4_gain" min="0" max="1" step="0.1" value="0"/><br/>
+            <label for="wave4_phase">Phase</label>
+            <input type="range" id="wave4_phase" name="wave4_phase" min="0" max="1" step="0.025" value="0"/><br/>
+            <label for="wave4_harmonic">Harmonic</label>
+            <input type="range" id="wave4_harmonic" name="wave4_harmonic" min="1" max="8" step="1" value="1"/>
+        </div>
+        <div id="envelope_settings" style="float:left">
+            <h3>Envelope</h3>
+            <label for="attack_time">Attack</label>
+            <input type="range" id="attack_time" name="attack_time" min="0" max="2" step="0.05" value="0.2"/><br/>
+            <label for="decay_time">Decay</label>
+            <input type="range" id="decay_time" name="decay_time" min="0" max="2" step="0.05" value="0"/><br/>
+            <label for="sustain_gain">Sustain</label>
+            <input type="range" id="sustain_gain" name="sustain_gain" min="0" max="1" step="0.05" value="1"/><br/>
+            <label for="release_time">Release</label>
+            <input type="range" id="release_time" name="release_time" min="0" max="2" step="0.05" value="0.2"/>
+        </div>
+    
+    
+        <p style="clear:left;"></p>
+    </div>
+
+        
+
+    <div id="keyboard">
+        <h2>Keyboard</h2>
+        <p></p>
+        <div id="kb_1st_row">
+        </div>
+        <div id="kb_2nd_row">
+        </div>
+        <div id="kb_3rd_row">
+        </div>
+        <div id="kb_4th_row">
+        </div>
+    </div>
+    <div id="help" style="clear:left;">
+        <h2>PAQ (potentially asked questions)</h2>
+        <p class="question">"N-div" what?!</p>
+        <p class="answer">In 12-div equal temperament (the "normal" one, used to tune pianos), you divide the octave in 12 equally sized intervals (equal in terms of frequency ratios, not absolute frequencies). Here you can simply choose any other number (call it N).</p>
+        <p class="question">Why would you do this?</p>
+        <p class="answer">Why not?</p>
+        <p class="question">How do I play?</p>
+        <p class="answer">In order to play, press/touch the buttons or use the number keys and letter keys to control the keyboard.</p>
+        <p class="question">What do the colors of the keys mean, why do they change when I change the octave division?</p>
+        <p>Octaves of the base frequency are shown in orange. Notes of the 12-div chromatic scale (or very close to it) are shown in white. The rest (in grey) are "microtonal" with respect to the base frequency.</p>
+        <p class="question">Which browsers are compatible?</p>
+        <p class="answer">At least recent versions of Firefox, Chrome and Safari. Try those first and then see if your more exotic browsers work the same.</p>
+        <p class="question">Will it work on my tablet/phone?</p>
+        <p class="answer">That is the goal, but no guarantees yet. So far I have only tested it on my Android phone with Google Chrome and it sort of works (the sound is really choppy but it might be my cheap phone's hardware).</p>
+        <p class="question">There's no sound? What to do?</p>
+        <p class="answer">Try refreshing the page. Make sure the browser window has focus and that the tab is active. Especially if you have the web console open, sounds may sometimes disappear (at least on Firefox).<br/>Also, disable any script blocking extensions or browser settings (the app obviously needs javascript).</p>
+        <p class="question">Aaarrrgh, a key got stuck / sound won't stop playing!</p>
+        <p class="answer">Press and release the key again (or refresh the page). This happens sometimes if you are quick enough or if you switch tabs while sound is playing.</p>
+        <p class="question">The sound is terribly choppy / clicky / distorted!</p>
+        <p class="answer">It could be your speakers, your hardware, your OS, your browser etc., or it could just be the waveform you've chosen. Or, you might be playing a dissonant chord (note: all chords will be slightly dissonant when the octave is divided like this, some of course more than others).<br/>I have tried to limit the distortion and clipping by using highpass/lowpass filters, maybe my cutoff frequencies are too permissive (but on the other hand, I don't want to loose too much information by filtering).<br/>Try reducing the gain on the waves in Waveform Settings or the output volume of your speakers.</p>
+        <p class="question">What libraries did you use for this?</p>
+        <p class="answer">No external libs besdies Web Audio API (https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html), which should be implemented by most decent browsers. So, pretty much plain old javascript.</p>
+        <p class="question">Can I use this for classroom demonstrations, homework, etc.?</p>
+        <p class="answer">Of course!</p>
+        <p class="question">Can I use this for a musical perfomrance (either live or recorded)?</p>
+        <p class="answer">Sure!</p>
+    </div>
+    <div id="license">
+    <h2>LICENSE</h2>
+        MIT License<br><br>
+
+        Copyright (c) 2017 mgholm<br><br>
+
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:<br><br>
+
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.<br><br>
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+
+    </div>
+    <script>
+    window.audio_context = new (window.AudioContext || window.webkitAudioContext)();
+    window.filter = window.audio_context.createBiquadFilter();
+    window.filter.type = "highpass";
+    window.filter.frequency = 50;
+    window.filter.Q = 50;
+        
+    // lowpass filter will reduce popping sound when note is released
+    // the cutoff frequency can be very high for this job
+    
+    
+    var lpfilter = window.audio_context.createBiquadFilter();
+    lpfilter.type = "lowpass";
+    lpfilter.frequency = 10000;
+    lpfilter.Q = 50;
+    
+    window.filter.connect(lpfilter);
+    lpfilter.connect(window.audio_context.destination);
+    
+    window.oscillators = {};
+    var keyb = '1234567890QWERTYUIOPASDFGHJKLZXCVBNM'; 
+    
+    // user settings (changed by inputs)
+    var wave_types = ['sine', 'sine', 'sine', 'sine'];
+    var wave_gains = [1, 0, 0, 0];
+    var wave_phases = [0, 0, 0, 0];
+    var wave_harmonics = [undefined, 1, 1, 1];
+    
+    var env_attack_t = 0.2;     // s
+    var env_decay_t = 0;        // s
+    var env_sus_gain = 1;       // percentage of peak gain
+    var env_release_t = 0.2;    // s
+    
+    function update_user_settings() {
+        wave_types[0] = document.getElementById('wave1_type').value;
+        wave_types[1] = document.getElementById('wave2_type').value;
+        wave_types[2] = document.getElementById('wave3_type').value;
+        wave_types[3] = document.getElementById('wave4_type').value;
+        
+        wave_gains[0] = Number(document.getElementById('wave1_gain').value);
+        wave_gains[1] = Number(document.getElementById('wave2_gain').value);
+        wave_gains[2] = Number(document.getElementById('wave3_gain').value);
+        wave_gains[3] = Number(document.getElementById('wave4_gain').value);
+        
+        wave_harmonics[1] = Number(document.getElementById('wave2_harmonic').value);
+        wave_harmonics[2] = Number(document.getElementById('wave3_harmonic').value);
+        wave_harmonics[3] = Number(document.getElementById('wave4_harmonic').value);
+        
+        wave_phases[0] = Number(document.getElementById('wave1_phase').value);
+        wave_phases[1] = Number(document.getElementById('wave2_phase').value);
+        wave_phases[2] = Number(document.getElementById('wave3_phase').value);
+        wave_phases[3] = Number(document.getElementById('wave4_phase').value);
+        
+        env_attack_t = Number(document.getElementById('attack_time').value);
+        env_decay_t = Number(document.getElementById('decay_time').value);
+        env_sus_gain = Number(document.getElementById('sustain_gain').value);
+        env_release_t = Number(document.getElementById('release_time').value);
+        
+    }
+    
+    function set_oscillator_frequency(key, frequency) {
+        var oscillators = window.oscillators[key];
+        var l = oscillators.length;
+        for (var i = 0; i < l; i++) {
+            oscillators[i].frequency.value = frequency;
+        }
+    }
+            
+    function start_sound(key) {
+        var oscillators = window.oscillators[key];
+        var l = oscillators.length;
+        var did_something = false;
+        for (var i = 0; i < l; i++) {
+            var oscillator = oscillators[i];
+            oscillator.type = wave_types[i];
+            
+            if (i > 0) {
+                var harmonic = wave_harmonics[i];
+                oscillator.frequency.setValueAtTime(oscillators[0].frequency.value * harmonic, window.audio_context.currentTime);
+            }
+            
+            var peak_gain = wave_gains[i];
+            if (peak_gain == 0) continue; // no sense playing sound if it is silent
+            
+            var phase_shift = wave_phases[i];
+            var phase_delay = phase_shift / oscillator.frequency.value;
+            oscillator.delay.delayTime.setValueAtTime(phase_delay, window.audio_context.currentTime);
+            
+            oscillator.gain.gain.cancelScheduledValues(window.audio_context.currentTime);
+            
+            // ATTACK envelope
+            if (env_attack_t < 0.0001) {
+                // if attack is zero (infinitely fast), exponential ramp cannot be used, just set is right away
+                oscillator.gain.gain.setValueAtTime(peak_gain, window.audio_context.currentTime);
+            }
+            else {
+                // default case: start ramp from small non-zero value
+                oscillator.gain.gain.setValueAtTime(0.000001, window.audio_context.currentTime);
+                try {
+                    // NOTE: ramps start from the previous registered event!
+                    oscillator.gain.gain.exponentialRampToValueAtTime(peak_gain, window.audio_context.currentTime + env_attack_t);
+                } catch (error) {
+                    // for some reason, exponential ramp may fail even with these precautions
+                    // linear should always work, and since exponential seems to fail mainly when the changes are small
+                    // linear should be a fair approximation
+                    oscillator.gain.gain.linearRampToValueAtTime(peak_gain, window.audio_context.currentTime + env_attack_t);
+                }
+                
+            }
+            
+            // DECAY + SUSTAIN envelope
+            if (env_sus_gain < 0.99999){
+                if (env_decay_t < 0.0001) {
+                    // if decay is zero (infinitely fast), exponential ramp cannot be used, just set is right away
+                    oscillator.gain.gain.setValueAtTime(peak_gain * env_sus_gain, window.audio_context.currentTime + env_attack_t);
+                }
+                else {
+                    // default case: start ramp from small non-zero value
+                    var sus_level = Math.max(peak_gain * env_sus_gain, 0.01); // don't allow sustain to be zero
+                    oscillator.gain.gain.setValueAtTime(peak_gain, window.audio_context.currentTime + env_attack_t);
+                    try {
+                        oscillator.gain.gain.exponentialRampToValueAtTime(sus_level, window.audio_context.currentTime + env_attack_t + env_decay_t);
+                    } catch (error) {
+                        oscillator.gain.gain.linearRampToValueAtTime(sus_level, window.audio_context.currentTime + env_attack_t + env_decay_t);
+                    }
+                    
+                }
+            }
+            oscillator.playing = true;
+            did_something = true;
+        }
+        return did_something;
+    }
+    
+    function stop_sound(key) {
+        var oscillators = window.oscillators[key];
+        var l = oscillators.length;
+        var did_something = false;
+        for (var i = 0; i < l; i++) {
+            var oscillator = oscillators[i];
+            if (!oscillator.playing) continue;
+            
+            oscillator.gain.gain.cancelScheduledValues(window.audio_context.currentTime);
+            
+            if (env_release_t == 0) {
+               oscillator.gain.gain.setValueAtTime(0, window.audio_context.currentTime);
+            }
+            else {
+                oscillator.gain.gain.setValueAtTime(wave_gains[i] * env_sus_gain, window.audio_context.currentTime);
+                try {
+                    oscillator.gain.gain.exponentialRampToValueAtTime(0.001, window.audio_context.currentTime + env_release_t);
+                } catch (error) {
+                    oscillator.gain.gain.linearRampToValueAtTime(0.001, window.audio_context.currentTime + env_release_t);
+                }
+                oscillator.gain.gain.setValueAtTime(0.0, window.audio_context.currentTime + env_release_t);
+            }
+            oscillator.playing = false;
+            did_something = true;
+        }
+        return did_something;
+    }
+        
+    function keydown_action(event) {
+        var key = event.which || event.keyCode;
+        key = String.fromCharCode((96 <= key && key <= 105)? key-48 : key);
+        if (keyb.indexOf(key) == -1) return;
+        
+        var osc = window.oscillators[key];
+        for (var i = 0; i < wave_types.length; i++){
+            if (osc[i].playing) return; // if any of the oscillators for this key is playing, don't do anything
+        }
+        
+        if (start_sound(key)) {
+            var button = document.getElementById("note_" + key);
+            if (button.className.indexOf('octave') != -1) {
+                button.className = "note_button highlighted_octave_button";
+            }
+            else if (button.className.indexOf('microtonal') != -1) {
+                button.className = "note_button highlighted_microtonal_button";
+            }
+            else
+                button.className = "note_button highlighted_button";
+        }
+                
+        return false;
+    }
+    
+    function keyup_action(event) {
+        var key = event.which || event.keyCode;
+        key = String.fromCharCode((96 <= key && key <= 105)? key-48 : key);
+        if (keyb.indexOf(key) == -1) return; 
+        
+        var osc = window.oscillators[key];
+        
+        var osc_playing = false;
+        for (var i = 0; i < wave_types.length; i++){
+            if (osc[i].playing) {
+                osc_playing = true;
+                break;
+            }
+        }
+        if (!osc_playing) return; // if none of the oscillators for this key are playing, don't do anything
+        
+        if (stop_sound(key)) {
+            var button = document.getElementById("note_" + key);
+            if (button.className.indexOf('octave') != -1) {
+                button.className = "note_button non_highlighted_octave_button";
+            }
+            else if (button.className.indexOf('microtonal') != -1) {
+                button.className = "note_button non_highlighted_microtonal_button";
+            }
+            else
+                button.className = "note_button non_highlighted_button";
+        }
+        return false;
+    }
+    
+    function make_octave_division() {        
+        var num_divs = Number(document.getElementById('num_divs').value);
+        var base_freq = Number(document.getElementById('base_freq').value); 
+        var l = keyb.length;
+        for (var i = 0; i < l; i++) {
+            var freq = base_freq * Math.pow(2, 1.0*i/num_divs);
+            var button = document.getElementById('note_' + keyb[i]);
+            set_oscillator_frequency(keyb[i], freq);
+            if (i % num_divs == 0) {
+                button.className = "note_button non_highlighted_octave_button";
+                continue;
+            }
+            var check_for_12div = Math.log2(1.0*freq/base_freq)*12.0;
+            if (Math.abs(check_for_12div - Math.round(check_for_12div)) > 0.000001) {
+                button.className = "note_button non_highlighted_microtonal_button";
+                continue;
+            }
+            button.className = "note_button non_highlighted_button";
+        }
+    }
+    
+    function make_keyboard() {
+        var l = keyb.length;
+        var buttons = [];
+        for (var i = 0; i < l; i++) {
+            var keycode = keyb.charCodeAt(i);
+            buttons.push('<div ontouchstart="event.preventDefault(); keydown_action({which:' + keycode + '});" onmousedown="event.preventDefault(); keydown_action({which:' + keycode + '});" ontouchend="event.preventDefault(); keyup_action({which:' + keycode + '});" onmouseup="event.preventDefault(); keyup_action({which:' + keycode + '});" class="note_button non_highlighted_button" id="note_' + keyb[i] + '">' + keyb[i] + '</div>');
+            if (keyb[i] == '0') {
+                document.getElementById('kb_1st_row').innerHTML = buttons.join('');
+                buttons.length = 0;
+            }
+            else if (keyb[i] == 'P') {
+                document.getElementById('kb_2nd_row').innerHTML = buttons.join('');
+                buttons.length = 0;
+            }
+            else if (keyb[i] == 'L') {
+                document.getElementById('kb_3rd_row').innerHTML = buttons.join('');
+                buttons.length = 0;
+            }
+            else if (keyb[i] == 'M') {
+                document.getElementById('kb_4th_row').innerHTML = buttons.join('');
+                buttons.length = 0;
+            }
+        }
+    }
+    
+    window.onload = (function() {
+        make_keyboard();
+        for (var i = 0; i < keyb.length; i++) {
+            var oscillators = new Array(4); // number of waves in synth options
+            for (var j = 0; j < 4; j++) {
+                var oscillator = window.audio_context.createOscillator();
+                oscillator.type = 'sine'; // will be set later
+                oscillator.frequency.value = 440; // will be set later
+        
+                var gain = audio_context.createGain();
+                gain.gain.value = 0;
+                oscillator.connect(gain);
+                oscillator.gain = gain;
+                
+                var delay = audio_context.createDelay(3.0);
+                oscillator.gain.connect(delay);
+                delay.delayTime.value = 0; // will be set later
+                oscillator.delay = delay;
+                
+                oscillator.start(0);
+                oscillator.playing = false;
+                delay.connect(window.filter);
+                oscillators[j] = oscillator;
+            }
+            window.oscillators[keyb[i]] = oscillators;
+        }   
+        make_octave_division();
+        
+        // for all inputs in settings
+        var settings = document.getElementById('settings');
+        var inputs = settings.getElementsByTagName('input');
+        for (var i = 0; i < inputs.length; i++) {
+            inputs[i].onchange = update_user_settings;
+        }
+        var selects = settings.getElementsByTagName('select');
+        for (var i = 0; i < selects.length; i++) {
+            selects[i].onchange = update_user_settings;
+        }
+        update_user_settings();
+    });
+    
+    </script>
+</body>
+</html>
+
+
