@@ -27,11 +27,10 @@
     }
     #keyboard {
         margin-left: 20px;
-        height: 200px;
     }
     .note_button {
-        width: 8%;
-        height: 40px;
+        width: 9%;
+        height: 80px;
         margin: 1px;
         padding: 0px;
         border: 0px;
@@ -100,17 +99,29 @@
     </style>
 
     <h1 style="float:left;">Microtonal N-div Synth</h1>
-    <div id="settings" style="clear:both;">
+    <div id="divsettings" style="clear:both;">
         <label for="base_freq">Base frequency</label>
         <input type="text" id="base_freq" name="base_freq" value="110"/>
-        <p></p>
         <label for="num_divs">Divide octave in</label>
         <input type="text" id="num_divs" name="num_divs" value="12"/>
-        <p></p>
-        <p class="small_print">Note: if you set the division to 12 (or any divisor of 12), you won't actually get microtonal results ;).</p>
         <button onclick="make_octave_division()">Set Division</button>
+        <p class="small_print">Note: if you set the division to 12 (or any divisor of 12), you won't actually get microtonal results ;).</p>
+        
+    </div>
+    <div id="keyboard" style="clear:both;">
+        <h2>Keyboard</h2>
+        <p></p>
+        <div id="kb_1st_row"></div>
+        <div id="kb_2nd_row"></div>
+        <div id="kb_3rd_row"></div>
+        <div id="kb_4th_row"></div>
+    </div>
+    <div id="settings" style="clear:both;">
+        
+        
+        
+        
         <h2>Waveform Settings</h2>
-    
         <div style="float:left;">
             <h3>Wave 1</h3>
             <select id="wave1_type" name="wave1_type">
@@ -189,18 +200,7 @@
 
         
 
-    <div id="keyboard">
-        <h2>Keyboard</h2>
-        <p></p>
-        <div id="kb_1st_row">
-        </div>
-        <div id="kb_2nd_row">
-        </div>
-        <div id="kb_3rd_row">
-        </div>
-        <div id="kb_4th_row">
-        </div>
-    </div>
+    
     <div id="help" style="clear:left;">
         <h2>PAQ (potentially asked questions)</h2>
         <p class="question">"N-div" what?!</p>
