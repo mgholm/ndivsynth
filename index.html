@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -253,15 +254,42 @@
 
     </div>
     <script>
+    
+        
+    // lowpass filter will reduce popping sound when note is released
+    // the cutoff frequency can be very high for this job
+    
+    function phase_offset_2_delay(phase_offset, frequency) {
+        return phase_offset / frequency;
+    }
+    
+    function create_oscillator(key, osc_index, type, frequency, phase_offset) {
+        var oscillator = window.audio_context.createOscillator();
+        oscillator.type = type;
+        oscillator.frequency.value = frequency;
+
+        var gain = audio_context.createGain();
+        gain.gain.value = 0;
+        oscillator.connect(gain);
+        oscillator.gain = gain;
+        
+        var delay = audio_context.createDelay(3.0);
+        oscillator.gain.connect(delay);
+        delay.delayTime.value = phase_offset_2_delay(phase_offset, frequency);
+        oscillator.delay = delay;
+        
+        delay.connect(window.filter);
+        
+        oscillator.start(0);
+        oscillator.playing = false;
+        window.oscillators[key][osc_index] = oscillator;
+    }
+    
     window.audio_context = new (window.AudioContext || window.webkitAudioContext)();
     window.filter = window.audio_context.createBiquadFilter();
     window.filter.type = "highpass";
     window.filter.frequency = 50;
     window.filter.Q = 50;
-        
-    // lowpass filter will reduce popping sound when note is released
-    // the cutoff frequency can be very high for this job
-    
     
     var lpfilter = window.audio_context.createBiquadFilter();
     lpfilter.type = "lowpass";
@@ -272,13 +300,23 @@
     lpfilter.connect(window.audio_context.destination);
     
     window.oscillators = {};
-    var keyb = '1234567890QWERTYUIOPASDFGHJKLZXCVBNM'; 
+    var keyb = '1234567890QWERTYUIOPASDFGHJKLZXCVBNM';
+    
+    for (var i = 0; i < keyb.length; i++) {
+        window.oscillators[keyb[i]] = new Array(4); // number of waves in synth options
+        
+        for (var j = 0; j < 4; j++) {
+            create_oscillator(keyb[i], j, 'sine', 440, 0);
+        }
+    }  
     
     // user settings (changed by inputs)
     var wave_types = ['sine', 'sine', 'sine', 'sine'];
     var wave_gains = [1, 0, 0, 0];
     var wave_phases = [0, 0, 0, 0];
     var wave_harmonics = [undefined, 1, 1, 1];
+    
+    
     
     var env_attack_t = 0.2;     // s
     var env_decay_t = 0;        // s
@@ -310,7 +348,19 @@
         env_sus_gain = Number(document.getElementById('sustain_gain').value);
         env_release_t = Number(document.getElementById('release_time').value);
         
+        
+        for (var i = 0; i < keyb.length; i++) {
+            for (var j = 0; j < wave_phases.length; j++) {
+                var oscillator = window.oscillators[keyb[i]][j];
+                var phase_shift = wave_phases[j];
+                var phase_delay = phase_offset_2_delay(phase_shift, oscillator.frequency.value);
+                oscillator.delay.delayTime.value = phase_delay;
+            }
+        }
+        
     }
+    
+    
     
     function set_oscillator_frequency(key, frequency) {
         var oscillators = window.oscillators[key];
@@ -336,15 +386,11 @@
             var peak_gain = wave_gains[i];
             if (peak_gain == 0) continue; // no sense playing sound if it is silent
             
-            var phase_shift = wave_phases[i];
-            var phase_delay = phase_shift / oscillator.frequency.value;
-            oscillator.delay.delayTime.setValueAtTime(phase_delay, window.audio_context.currentTime);
-            
             oscillator.gain.gain.cancelScheduledValues(window.audio_context.currentTime);
             
             // ATTACK envelope
             if (env_attack_t < 0.0001) {
-                // if attack is zero (infinitely fast), exponential ramp cannot be used, just set is right away
+                // if attack is zero (infinitely fast), just set is right away
                 oscillator.gain.gain.setValueAtTime(peak_gain, window.audio_context.currentTime);
             }
             else {
@@ -359,13 +405,12 @@
                     // linear should be a fair approximation
                     oscillator.gain.gain.linearRampToValueAtTime(peak_gain, window.audio_context.currentTime + env_attack_t);
                 }
-                
             }
             
             // DECAY + SUSTAIN envelope
             if (env_sus_gain < 0.99999){
                 if (env_decay_t < 0.0001) {
-                    // if decay is zero (infinitely fast), exponential ramp cannot be used, just set is right away
+                    // if decay is zero (infinitely fast), just set is right away
                     oscillator.gain.gain.setValueAtTime(peak_gain * env_sus_gain, window.audio_context.currentTime + env_attack_t);
                 }
                 else {
@@ -377,7 +422,6 @@
                     } catch (error) {
                         oscillator.gain.gain.linearRampToValueAtTime(sus_level, window.audio_context.currentTime + env_attack_t + env_decay_t);
                     }
-                    
                 }
             }
             oscillator.playing = true;
@@ -400,7 +444,7 @@
                oscillator.gain.gain.setValueAtTime(0, window.audio_context.currentTime);
             }
             else {
-                oscillator.gain.gain.setValueAtTime(wave_gains[i] * env_sus_gain, window.audio_context.currentTime);
+                //oscillator.gain.gain.setValueAtTime(wave_gains[i] * env_sus_gain, window.audio_context.currentTime);
                 try {
                     oscillator.gain.gain.exponentialRampToValueAtTime(0.001, window.audio_context.currentTime + env_release_t);
                 } catch (error) {
@@ -516,31 +560,7 @@
     }
     
     window.onload = (function() {
-        make_keyboard();
-        for (var i = 0; i < keyb.length; i++) {
-            var oscillators = new Array(4); // number of waves in synth options
-            for (var j = 0; j < 4; j++) {
-                var oscillator = window.audio_context.createOscillator();
-                oscillator.type = 'sine'; // will be set later
-                oscillator.frequency.value = 440; // will be set later
-        
-                var gain = audio_context.createGain();
-                gain.gain.value = 0;
-                oscillator.connect(gain);
-                oscillator.gain = gain;
-                
-                var delay = audio_context.createDelay(3.0);
-                oscillator.gain.connect(delay);
-                delay.delayTime.value = 0; // will be set later
-                oscillator.delay = delay;
-                
-                oscillator.start(0);
-                oscillator.playing = false;
-                delay.connect(window.filter);
-                oscillators[j] = oscillator;
-            }
-            window.oscillators[keyb[i]] = oscillators;
-        }   
+        make_keyboard(); 
         make_octave_division();
         
         // for all inputs in settings
@@ -559,5 +579,3 @@
     </script>
 </body>
 </html>
-
-
